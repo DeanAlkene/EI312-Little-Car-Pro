@@ -2,8 +2,8 @@
 #define LEFT_BACK 10
 #define RIGHT_AHEAD 12
 #define RIGHT_BACK 13
-int RUN = 300;
-int TURN = 200;
+int RUN = 200;
+int TURN = 100;
 void goAhead();
 void goLeftAhead();
 void goRightAhead();
