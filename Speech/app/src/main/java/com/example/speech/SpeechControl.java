@@ -2,11 +2,18 @@ package com.example.speech;
 
 import android.content.Context;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,15 +30,37 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class SpeechControl extends AppCompatActivity{
+    public static ImageView img;
+    private static Bitmap bitmap;
+
     private Bluetooth bluetooth;
+    private Receive rev;
+    private bitmapHandler handler;
+    static int num = 0;
+
+    Bitmap srcBitmap;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_speech_control);
+        img = (ImageView) findViewById(R.id.camera);
+        handler = new bitmapHandler();
+        rev = new Receive(handler);
+        new Thread(rev).start();
+
+        Button takePhoto = (Button) findViewById(R.id.photo);
+        takePhoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) { savePhoto(SpeechControl.this, bitmap, "Pic"); }
+        });
 
         SpeechUtility.createUtility(this, SpeechConstant.APPID + "=5dd7f6d0");
         Button startButton = (Button) findViewById(R.id.recog);
@@ -162,5 +191,53 @@ public class SpeechControl extends AppCompatActivity{
         public class CWBean {
             public String w;
         }
+    }
+
+    static class bitmapHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            if(msg.what == 0x1) {
+                bitmap = (Bitmap) msg.obj;
+                img.setImageBitmap(bitmap);
+                super.handleMessage(msg);
+            }
+        }
+    }
+
+    public static void savePhoto(Context context, Bitmap bitmap, String name) {
+        String fileName = null;
+        num++;
+        name = name + String.valueOf(num);
+
+        String gallertPath = Environment.getExternalStorageDirectory()
+                + File.separator + Environment.DIRECTORY_DCIM
+                + File.separator + "Camera" + File.separator;
+
+        File file = null;
+        FileOutputStream out = null;
+
+        try {
+            file = new File(gallertPath, name + ".jpg");
+            fileName = file.toString();
+            out = new FileOutputStream(fileName);
+            if(out != null) {
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+            }
+        } catch (Exception e) {
+            e.getStackTrace();
+        } finally {
+            try {
+                if(out != null) {
+                    out.close();
+                }
+            }catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, fileName, null);
+        Uri uri = Uri.fromFile(file);
+        context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri));
+        Toast.makeText(context, "照片已储存", Toast.LENGTH_SHORT);
     }
 }
