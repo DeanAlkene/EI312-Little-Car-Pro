@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static OutputStream os = null;
     private static Socket socket = null;
-    private static String IP = "192.168.1.1"; //need to change
+    private static String IP = "192.168.43.109"; //need to change
     private static String data;
     private Bitmap bmp = null;
     private static boolean socketStatus = false;
@@ -117,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     class imageStream implements Camera.PreviewCallback {
-        private String ip = "192.168.1.1"; //need to be changed
+        private String ip = "192.168.43.109"; //need to be changed
 
         public imageStream(String ip) { this.ip = ip; }
 
@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
         private byte buf[] = new byte[4096];
         private OutputStream outputStream;
         private ByteArrayOutputStream byteArrayOutputStream;
-        private String ip = "192.168.1.1"; //need to be changed
+        private String ip = "192.168.43.109"; //need to be changed
 
         public sendThread(ByteArrayOutputStream outStream, String ip) {
             this.byteArrayOutputStream = outStream;

@@ -28,7 +28,7 @@ public class Bluetooth extends Thread{
     public Bluetooth(Handler out) {
         this.out = out;
         BA = BluetoothAdapter.getDefaultAdapter();
-}
+    }
 
     public void setOut(Handler out) {
         this.out = out;
@@ -45,12 +45,14 @@ public class Bluetooth extends Thread{
             BA.enable();
         }
         deviceSet = BA.getBondedDevices();
-        UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+        UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
 
         if(deviceSet.size() != 0) {
             device = deviceSet.iterator().next();
             try {
-                socket = device.createRfcommSocketToServiceRecord(uuid);
+                socket = (BluetoothSocket) device.getClass().getMethod("createRfcommSocket", new Class[] {int.class}).invoke(device,1);
+                //socket = device.createRfcommSocketToServiceRecord(uuid);
+                BA.cancelDiscovery();
                 socket.connect();
                 outStream = new BufferedOutputStream(socket.getOutputStream());
             } catch (Exception e) {

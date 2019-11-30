@@ -46,6 +46,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".SpeechControl"> </activity>
+        <activity android:name=".Test"> </activity>
         <meta-data
             android:name="IFLYTEK_APPKEY"
             android:value="5dd7f6d0" />

@@ -79,7 +79,7 @@ public class SpeechControl extends AppCompatActivity{
         mDialog.setListener((new RecognizerDialogListener() {
             @Override
             public void onResult(RecognizerResult recognizerResult, boolean b) {
-                if(b) {
+                if(!b) {
                     Boolean isLegal = false;
                     String result = parse(recognizerResult.getResultString());
 
@@ -209,7 +209,7 @@ public class SpeechControl extends AppCompatActivity{
         num++;
         name = name + String.valueOf(num);
 
-        String gallertPath = Environment.getExternalStorageDirectory()
+        String galleryPath = Environment.getExternalStorageDirectory()
                 + File.separator + Environment.DIRECTORY_DCIM
                 + File.separator + "Camera" + File.separator;
 
@@ -217,7 +217,7 @@ public class SpeechControl extends AppCompatActivity{
         FileOutputStream out = null;
 
         try {
-            file = new File(gallertPath, name + ".jpg");
+            file = new File(galleryPath, name + ".jpg");
             fileName = file.toString();
             out = new FileOutputStream(fileName);
             if(out != null) {

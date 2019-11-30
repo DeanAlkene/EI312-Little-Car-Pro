@@ -3,6 +3,7 @@ package com.example.speech;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -15,6 +16,8 @@ import android.widget.ToggleButton;
 
 public class MainActivity extends AppCompatActivity {
     private Bluetooth bluetooth;
+    private SharedPreferences preferences;
+    private SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +32,18 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intentSpeech);
             }
         });
+
+        Button testButton = (Button) findViewById(R.id.speechButton2);
+        testButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intentTest = new Intent(MainActivity.this, Test.class);
+                startActivity(intentTest);
+            }
+        });
+
+        preferences = getSharedPreferences("Speech", MODE_PRIVATE);
+        editor = preferences.edit();
     }
 
     @Override
