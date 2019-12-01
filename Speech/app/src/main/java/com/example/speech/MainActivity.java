@@ -42,6 +42,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        Button mannualButton = (Button) findViewById(R.id.speechButton3);
+        mannualButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intentTest = new Intent(MainActivity.this, Mannual.class);
+                startActivity(intentTest);
+            }
+        });
+
         preferences = getSharedPreferences("Speech", MODE_PRIVATE);
         editor = preferences.edit();
     }
