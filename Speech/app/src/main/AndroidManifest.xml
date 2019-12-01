@@ -47,6 +47,8 @@
         </activity>
         <activity android:name=".SpeechControl"> </activity>
         <activity android:name=".Test"> </activity>
+        <activity android:name=".Mannual" />
+
         <meta-data
             android:name="IFLYTEK_APPKEY"
             android:value="5dd7f6d0" />

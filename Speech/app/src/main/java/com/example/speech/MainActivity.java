@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         Button mannualButton = (Button) findViewById(R.id.speechButton3);
-        testButton.setOnClickListener(new View.OnClickListener() {
+        mannualButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intentTest = new Intent(MainActivity.this, Mannual.class);
