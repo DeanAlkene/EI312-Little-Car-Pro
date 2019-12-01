@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -198,10 +199,20 @@ public class SpeechControl extends AppCompatActivity{
         public void handleMessage(Message msg) {
             if(msg.what == 0x1) {
                 bitmap = (Bitmap) msg.obj;
+                bitmap = rotate(90.0f, bitmap);
                 img.setImageBitmap(bitmap);
                 super.handleMessage(msg);
             }
         }
+    }
+
+    public static Bitmap rotate(float angle, Bitmap bitmap) {
+        Matrix mat = new Matrix();
+        mat.postRotate(angle);
+
+        Bitmap newBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), mat, true);
+
+        return newBitmap;
     }
 
     public static void savePhoto(Context context, Bitmap bitmap, String name) {

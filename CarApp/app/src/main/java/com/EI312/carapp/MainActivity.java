@@ -24,6 +24,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.WildcardType;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Map;
@@ -38,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static OutputStream os = null;
     private static Socket socket = null;
-    private static String IP = "192.168.43.109"; //need to change
+    private static String IP = "192.168.43.1"; //need to change
     private static String data;
     private Bitmap bmp = null;
     private static boolean socketStatus = false;
@@ -74,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
                     camera.release();
                     camera = null;
                 }
-                return; //???
+                System.exit(0);
             }
 
             @Override
@@ -117,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     class imageStream implements Camera.PreviewCallback {
-        private String ip = "192.168.43.109"; //need to be changed
+        private String ip = "192.168.43.1"; //need to be changed
 
         public imageStream(String ip) { this.ip = ip; }
 
@@ -139,10 +140,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     class sendThread extends Thread {
-        private byte buf[] = new byte[4096];
+        private byte buf[] = new byte[1024];
         private OutputStream outputStream;
         private ByteArrayOutputStream byteArrayOutputStream;
-        private String ip = "192.168.43.109"; //need to be changed
+        private String ip = "192.168.43.1"; //need to be changed
 
         public sendThread(ByteArrayOutputStream outStream, String ip) {
             this.byteArrayOutputStream = outStream;
@@ -173,3 +174,4 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 }
+

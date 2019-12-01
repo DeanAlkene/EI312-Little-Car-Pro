@@ -29,7 +29,7 @@ public class Receive implements Runnable {
 
     public void run()
     {
-        byte [] buf = new byte[4096];
+        byte [] buf = new byte[1024];
         int len = 0;
 
         try{
