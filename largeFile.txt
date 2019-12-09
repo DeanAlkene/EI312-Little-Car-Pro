@@ -1,0 +1,2 @@
+remote: warning: File cvpr/app/src/main/jniLibs/x86_64/libopencv_java3.so is 62.34 MB; this is larger than GitHub's recommended maximum file size of 50.00 MB
+
