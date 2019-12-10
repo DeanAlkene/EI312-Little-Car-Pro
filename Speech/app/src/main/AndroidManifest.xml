@@ -48,6 +48,7 @@
         <activity android:name=".SpeechControl"> </activity>
         <activity android:name=".Test"> </activity>
         <activity android:name=".Mannual" />
+        <activity android:name=".slideya" />
 
         <meta-data
             android:name="IFLYTEK_APPKEY"
