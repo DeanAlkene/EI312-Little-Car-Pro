@@ -49,6 +49,7 @@
         <activity android:name=".Test"> </activity>
         <activity android:name=".Mannual" />
         <activity android:name=".slideya" />
+        <activity android:name=".faceDetect" />
 
         <meta-data
             android:name="IFLYTEK_APPKEY"

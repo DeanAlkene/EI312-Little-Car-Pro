@@ -60,6 +60,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        Button faceButton = (Button) findViewById(R.id.speechButton5);
+        faceButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intentTest = new Intent(MainActivity.this, faceDetect.class);
+                startActivity(intentTest);
+            }
+        });
+
+
         preferences = getSharedPreferences("Speech", MODE_PRIVATE);
         editor = preferences.edit();
     }
