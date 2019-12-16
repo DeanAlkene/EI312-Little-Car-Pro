@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
                 camera.setPreviewDisplay(sHolder);
                 camera.setPreviewCallback(new imageStream(IP));
                 camera.startPreview();
-                camera.setDisplayOrientation(90);
+//                camera.setDisplayOrientation(90);
                 camera.autoFocus(null);
 
             } catch (Exception e) {
@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
                 YuvImage img = new YuvImage(data, ImageFormat.NV21, size.width, size.height, null);
                 if(img != null) {
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    img.compressToJpeg(new Rect(0, 0, size.width, size.height), 100, outputStream);
+                    img.compressToJpeg(new Rect(0, 0, size.width, size.height), 80, outputStream);
                     Thread t = new sendThread(outputStream, ip);
                     t.start();
                 }

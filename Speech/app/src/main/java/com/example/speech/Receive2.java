@@ -16,7 +16,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.ServiceConfigurationError;
 
-public class Receive implements Runnable {
+public class Receive2 implements Runnable {
     public Socket s;
     public ServerSocket ss;
 
@@ -25,7 +25,7 @@ public class Receive implements Runnable {
     private Bitmap bitmap;
     private static final int COMPLETED = 0x111;
 
-    public Receive(Handler handler) { this.handler = handler; }
+    public Receive2(Handler handler) { this.handler = handler; }
 
     public void run()
     {
@@ -41,7 +41,8 @@ public class Receive implements Runnable {
         InputStream in = null;
         while (true) {
             try {
-                s = ss.accept();
+                for (int i = 0; i < 15; i++)
+                    s = ss.accept();
 
                 Log.e("start", "Start socket");
                 in = s.getInputStream();

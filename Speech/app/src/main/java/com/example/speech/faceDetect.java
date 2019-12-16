@@ -1,126 +1,178 @@
 package com.example.speech;
 
+import android.content.Context;
+
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.PointF;
+import android.media.FaceDetector; //人脸识别的关键类
+import android.media.FaceDetector.Face;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
-import org.opencv.android.BaseLoaderCallback;
-import org.opencv.android.CameraBridgeViewBase;
-import org.opencv.android.JavaCameraView;
-import org.opencv.android.LoaderCallbackInterface;
-import org.opencv.android.OpenCVLoader;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfRect;
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
-import org.opencv.objdetect.CascadeClassifier;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
-import java.io.Console;
+import com.google.gson.Gson;
+import com.iflytek.cloud.RecognizerResult;
+import com.iflytek.cloud.SpeechConstant;
+import com.iflytek.cloud.SpeechError;
+import com.iflytek.cloud.SpeechUtility;
+import com.iflytek.cloud.ui.RecognizerDialog;
+import com.iflytek.cloud.ui.RecognizerDialogListener;
+
+import android.content.Intent;
+
+import android.os.Handler;
+import android.os.Message;
+
+import org.opencv.core.Point;
+
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.ArrayList;
 
-public class faceDetect extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
+public class faceDetect extends AppCompatActivity {
+    public ImageView img;
+    private Bitmap bitmap;
 
-    JavaCameraView javaCameraView;
-    File cascFile;
-    CascadeClassifier faceDetector;
+    private static final int MAX_FACE_NUM = 1;
+    private int realFaceNum;
+    private Paint paint;
 
-    private Mat mRgba, mGrey;
+    private Bluetooth bluetooth;
+    private Receive2 rev;
+    private bitmapHandler handler;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.face);
+        setContentView(R.layout.activity_facedetect);
 
-        javaCameraView = (JavaCameraView)findViewById(R.id.JavaCamView);
+        paint = new Paint();
+        paint.setColor(Color.RED);
+        paint.setStyle(Paint.Style.STROKE);//不填充
+        paint.setStrokeWidth(10);  //线的宽度
 
-        if (!OpenCVLoader.initDebug()) {
-            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, baseCallback);
+        img = findViewById(R.id.face_camera);
+
+        handler = new bitmapHandler();
+        rev = new Receive2(handler);
+        new Thread(rev).start();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        bluetooth = ((MyApp) getApplication()).getBluetooth();
+        if (bluetooth != null) {
+            bluetooth.setOut(new Handler() {
+                @Override
+                public void handleMessage(Message msg) {
+                    if (msg.what == 0x0) {
+                        Intent intent = new Intent(faceDetect.this, MainActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                        intent.putExtra("Info", msg.obj.toString());
+                        startActivity(intent);
+                    }
+                }
+            });
+        }
+    }
+
+    public void sendOperation(String op) {
+        if (bluetooth.isAlive()) {
+            Message msg = new Message();
+            msg.what = 0x1;
+            msg.obj = op;
+            bluetooth.getIn().sendMessage(msg);
         } else {
-            try {
-                baseCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            Intent intent = new Intent(faceDetect.this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            intent.putExtra("Info", "Bluetooth Connection Suspended");
+            startActivity(intent);
         }
-
-        javaCameraView.setCvCameraViewListener(this);
     }
 
-    @Override
-    public void onCameraViewStarted(int width, int height) {
-        mRgba = new Mat();
-        mGrey = new Mat();
-    }
-
-    @Override
-    public void onCameraViewStopped() {
-        mRgba.release();
-        mGrey.release();
-    }
-
-    @Override
-    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        mRgba = inputFrame.rgba();
-        mGrey = inputFrame.gray();
-
-        // detect face
-
-        MatOfRect faceDetections = new MatOfRect();
-        faceDetector.detectMultiScale(mRgba, faceDetections);
-
-        for (Rect rect : faceDetections.toArray()) {
-            Imgproc.rectangle(mRgba, new Point(rect.x, rect.y),
-                    new Point(rect.x + rect.width, rect.y + rect.height),
-                    new Scalar(255, 0, 0));
-        }
-
-        return mRgba;
-    }
-
-    private BaseLoaderCallback baseCallback = new BaseLoaderCallback(this) {
+    class bitmapHandler extends Handler {
         @Override
-        public void onManagerConnected(int status) throws IOException {
-            switch (status) {
-                case LoaderCallbackInterface.SUCCESS: {
-                    InputStream is = getResources().openRawResource(R.raw.haarcascade_frontalface_alt2);
-                    File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
-                    cascFile = new File(cascadeDir, "haarcascade_frontalface_alt2");
+        public void handleMessage(Message msg) {
+            if (msg.what == 0x1) {
+                bitmap = (Bitmap) msg.obj;
 
-                    FileOutputStream fos = new FileOutputStream(cascFile);
+                FaceDetector faceDetector = new FaceDetector(bitmap.getWidth(), bitmap.getHeight(), MAX_FACE_NUM);
+                FaceDetector.Face[] faces = new FaceDetector.Face[MAX_FACE_NUM];
+                Bitmap mBitmap = bitmap.copy(Bitmap.Config.RGB_565, true);
+                realFaceNum = faceDetector.findFaces(mBitmap, faces);
 
-                    byte[] buffer = new byte[4096];
-                    int bytesRead;
+                drawFacesAreaAndSendOp(faces);
 
-                    while ((bytesRead = is.read(buffer)) != -1) {
-                        fos.write(buffer, 0, bytesRead);
-                    }
-
-                    is.close();
-                    fos.close();
-
-                    faceDetector = new CascadeClassifier(cascFile.getAbsolutePath());
-
-                    if (faceDetector.empty()) {
-                        faceDetector = null;
-                    } else {
-                        cascadeDir.delete();
-                    }
-
-                    javaCameraView.enableView();
-                }
-                break;
-
-                default: {
-                    super.onManagerConnected(status);
-                }
-                break;
+                super.handleMessage(msg);
             }
         }
-    };
+    }
+    private void drawFacesAreaAndSendOp(FaceDetector.Face[] faces) {
+        Bitmap mbitmap = bitmap.copy(Bitmap.Config.RGB_565, true);
+        Canvas canvas = new Canvas(mbitmap);
+
+        int argMaxArea = -1;
+        double maxEyesDis = 0;
+        for (int i = 0; i < faces.length; i++) {
+            FaceDetector.Face face = faces[i];
+            if (face != null) {
+                PointF pointF = new PointF();
+                face.getMidPoint(pointF);
+                float eyesDistance = face.eyesDistance();
+
+                canvas.drawRect(pointF.x - eyesDistance, pointF.y - eyesDistance, pointF.x + eyesDistance, pointF.y + eyesDistance, paint);
+
+                // find max face
+                if (face.eyesDistance() > maxEyesDis) {
+                    maxEyesDis = face.eyesDistance();
+                    argMaxArea = i;
+                }
+            }
+
+        }
+
+        bitmap = mbitmap;
+        img.setImageBitmap(bitmap);
+        img.invalidate();
+
+        // send op
+        if (realFaceNum == 0) {
+            sendOperation("S");
+        } else {
+            // tracking largest face
+            PointF pointF = new PointF();
+            faces[argMaxArea].getMidPoint(pointF);
+
+            double locX = pointF.x;
+
+            int w = bitmap.getWidth();
+
+            if (locX / w < 0.2) {
+                sendOperation("Q");
+            } else if (locX / w < 0.8) {
+                sendOperation("S");
+            } else if (locX / w < 1.0) {
+                sendOperation("E");
+            }
+        }
+    }
 }

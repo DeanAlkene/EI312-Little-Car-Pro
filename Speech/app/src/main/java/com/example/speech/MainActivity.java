@@ -15,6 +15,8 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 public class MainActivity extends AppCompatActivity {
+    public static int picNum = 0;
+
     private Bluetooth bluetooth;
     private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
@@ -24,29 +26,29 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button speechButton = (Button) findViewById(R.id.speechButton);
-        speechButton.setOnClickListener(new View.OnClickListener() {
+        Button testButton = (Button) findViewById(R.id.speechButton1);
+        testButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intentSpeech = new Intent(MainActivity.this, SpeechControl.class);
+                Intent intentSpeech = new Intent(MainActivity.this, Test.class);
                 startActivity(intentSpeech);
             }
         });
 
-        Button testButton = (Button) findViewById(R.id.speechButton2);
-        testButton.setOnClickListener(new View.OnClickListener() {
+        Button speechButton = (Button) findViewById(R.id.speechButton2);
+        speechButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intentTest = new Intent(MainActivity.this, Test.class);
+                Intent intentTest = new Intent(MainActivity.this, SpeechControl.class);
                 startActivity(intentTest);
             }
         });
 
-        Button mannualButton = (Button) findViewById(R.id.speechButton3);
-        mannualButton.setOnClickListener(new View.OnClickListener() {
+        Button controlButton = (Button) findViewById(R.id.speechButton3);
+        controlButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intentTest = new Intent(MainActivity.this, Mannual.class);
+                Intent intentTest = new Intent(MainActivity.this, Control.class);
                 startActivity(intentTest);
             }
         });
@@ -60,7 +62,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Button faceButton = (Button) findViewById(R.id.speechButton5);
+        Button gravityButton = (Button) findViewById(R.id.speechButton5);
+        gravityButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intentTest = new Intent(MainActivity.this, SensorControl.class);
+                startActivity(intentTest);
+            }
+        });
+
+        Button faceButton = (Button) findViewById(R.id.speechButton6);
         faceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -68,7 +79,6 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intentTest);
             }
         });
-
 
         preferences = getSharedPreferences("Speech", MODE_PRIVATE);
         editor = preferences.edit();

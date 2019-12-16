@@ -1,13 +1,51 @@
 package com.example.speech;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.widget.Toast;
 
 public class slideya extends Activity implements
         GestureDetector.OnGestureListener {
+    Bluetooth bluetooth;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        bluetooth = ((MyApp) getApplication()).getBluetooth();
+        if (bluetooth != null) {
+            bluetooth.setOut(new Handler() {
+                @Override
+                public void handleMessage(Message msg) {
+                    if (msg.what == 0x0) {
+                        Intent intent = new Intent(slideya.this, MainActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                        intent.putExtra("Info", msg.obj.toString());
+                        startActivity(intent);
+                    }
+                }
+            });
+        }
+    }
+
+    public void sendOperation(String op) {
+        if (bluetooth.isAlive()) {
+            Message msg = new Message();
+            msg.what = 0x1;
+            msg.obj = op;
+            bluetooth.getIn().sendMessage(msg);
+        } else {
+            Intent intent = new Intent(slideya.this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            intent.putExtra("Info", "Bluetooth Connection Suspended");
+            startActivity(intent);
+        }
+    }
+
     // 定义手势检测器实例
     GestureDetector detector;
 
@@ -46,12 +84,20 @@ public class slideya extends Activity implements
 
         if (beginX - endX > minMove && Math.abs(velocityX) > minVelocity) { // 左滑
             Toast.makeText(this, velocityX + "左滑", Toast.LENGTH_SHORT).show();
+
+            sendOperation("A");
         } else if (endX - beginX > minMove && Math.abs(velocityX) > minVelocity) { // 右滑
             Toast.makeText(this, velocityX + "右滑", Toast.LENGTH_SHORT).show();
+
+            sendOperation("D");
         } else if (beginY - endY > minMove && Math.abs(velocityY) > minVelocity) { // 上滑
             Toast.makeText(this, velocityX + "上滑", Toast.LENGTH_SHORT).show();
+
+            sendOperation("W");
         } else if (endY - beginY > minMove && Math.abs(velocityY) > minVelocity) { // 下滑
             Toast.makeText(this, velocityX + "下滑", Toast.LENGTH_SHORT).show();
+
+            sendOperation("S");
         }
 
         return false;
